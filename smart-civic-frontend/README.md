@@ -66,3 +66,46 @@ The visual system deliberately combines:
 ## Case-study alignment
 
 The UI directly reflects the supplied case study requirements: category, description, location, priority, complaint queues, status flow, comments, analytics, aging, high-priority locations and SLA performance. The optional AI idea is represented as a **Smart assist** entry point without pretending that an AI backend exists yet.
+
+## Enhanced prototype features
+
+In addition to the required case-study screens, the frontend includes:
+
+- Light/dark mode with local persistence
+- Header notification center
+- Advanced complaint search, filtering, sorting and empty states
+- Smart Assist demo for category/urgency/summary suggestions
+- Browser GPS location capture
+- Photo upload preview and removal
+- Complaint draft recovery using local storage
+- Copy/share complaint reference
+- Admin assignment and status controls
+- Rule-based priority explanation UI
+- SLA/workload/hotspot visualizations
+- Mobile navigation drawer
+- Indian-language translation support
+
+These are frontend prototype behaviors. API persistence remains the responsibility
+of the backend team.
+
+## Windows quick start
+
+You can double-click `RUN-CIVICFLOW.bat`. On the first run it installs dependencies,
+then starts the Vite development server.
+
+Manual start:
+
+```bash
+npm install
+npm run dev
+```
+
+Main routes:
+- `/citizen`
+- `/citizen/report`
+- `/citizen/complaints`
+- `/citizen/settings`
+- `/admin`
+- `/admin/complaints`
+- `/admin/analytics`
+- `/admin/settings`

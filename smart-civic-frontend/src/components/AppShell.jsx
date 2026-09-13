@@ -29,6 +29,10 @@ import LogoutRounded from "@mui/icons-material/LogoutRounded";
 import AddCircleOutlineRounded from "@mui/icons-material/AddCircleOutlineRounded";
 import ShieldRounded from "@mui/icons-material/ShieldRounded";
 import LanguageSwitcher from "./LanguageSwitcher";
+import NotificationCenter from "./NotificationCenter";
+import DarkModeRounded from "@mui/icons-material/DarkModeRounded";
+import LightModeRounded from "@mui/icons-material/LightModeRounded";
+import { useThemeMode } from "../theme/ThemeModeContext";
 import { useTranslation } from "react-i18next";
 
 export default function AppShell({ children }) {
@@ -36,6 +40,7 @@ export default function AppShell({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { mode, toggleMode } = useThemeMode();
   const isAdmin = location.pathname.startsWith("/admin");
   const base = isAdmin ? "/admin" : "/citizen";
 
@@ -55,7 +60,7 @@ export default function AppShell({ children }) {
     <Box sx={{ height:"100%", p:2, display:"flex", flexDirection:"column" }}>
       <Box sx={{ px:1.2, py:1.5, display:"flex", alignItems:"center", gap:1.3 }}>
         <Box sx={{ width:40, height:40, borderRadius:3, display:"grid", placeItems:"center", color:"#fff",
-          background:"linear-gradient(135deg,#315f8c,#5b83ac)", boxShadow:"5px 5px 12px rgba(163,177,198,.45), -5px -5px 12px #fff" }}>
+          background:"linear-gradient(135deg,#315f8c,#5b83ac)", boxShadow:"5px 5px 12px var(--cf-shadow-dark), -5px -5px 12px var(--cf-shadow-light)" }}>
           <ShieldRounded />
         </Box>
         <Box>
@@ -69,8 +74,8 @@ export default function AppShell({ children }) {
           <ListItemButton key={to} component={NavLink} to={to} end={to===base}
             onClick={()=>setMobileOpen(false)}
             sx={{ mb:.7, borderRadius:2.2, color:"#617187",
-              "&.active": { color:"#315f8c", bgcolor:"#e8eef5", boxShadow:"inset 4px 4px 8px rgba(163,177,198,.28), inset -4px -4px 8px #fff" },
-              "&:hover": { bgcolor:"#e8eef5" } }}>
+              "&.active": { color:"#315f8c", bgcolor:"action.hover", boxShadow:"inset 4px 4px 8px var(--cf-shadow-dark), inset -4px -4px 8px var(--cf-shadow-light)" },
+              "&:hover": { bgcolor:"action.hover" } }}>
             <ListItemIcon sx={{ minWidth:40, color:"inherit" }}>{icon}</ListItemIcon>
             <ListItemText primary={t(key)} primaryTypographyProps={{fontWeight:750}} />
           </ListItemButton>
@@ -96,21 +101,29 @@ export default function AppShell({ children }) {
   );
 
   return (
-    <Box sx={{ minHeight:"100vh", display:"flex" }}>
+    <Box sx={{ minHeight:"100vh", display:"flex", "--cf-surface": mode === "dark" ? "#1b2430" : "#e7edf4", "--cf-shadow-dark": mode === "dark" ? "rgba(0,0,0,.34)" : "rgba(163,177,198,.40)", "--cf-shadow-light": mode === "dark" ? "rgba(70,86,105,.16)" : "rgba(255,255,255,.88)" }}>
       <Drawer variant="permanent" sx={{ display:{xs:"none",md:"block"}, width:270, flexShrink:0,
-        "& .MuiDrawer-paper": { width:270, boxSizing:"border-box", border:0, bgcolor:"#edf2f7", p:1.5 } }}>
+        "& .MuiDrawer-paper": { width:270, boxSizing:"border-box", border:0, bgcolor:"background.default", p:1.5 } }}>
         {drawer}
       </Drawer>
       <Drawer variant="temporary" open={mobileOpen} onClose={()=>setMobileOpen(false)}
-        sx={{ "& .MuiDrawer-paper": { width:285, bgcolor:"#edf2f7", border:0 } }}>{drawer}</Drawer>
+        sx={{ "& .MuiDrawer-paper": { width:285, bgcolor:"background.default", border:0 } }}>{drawer}</Drawer>
       <Box component="main" sx={{ flex:1, minWidth:0 }}>
         <Box sx={{ height:72, px:{xs:2,md:4}, display:"flex", alignItems:"center", justifyContent:"space-between",
-          position:"sticky", top:0, zIndex:10, bgcolor:"rgba(237,242,247,.88)", backdropFilter:"blur(16px)" }}>
+          position:"sticky", top:0, zIndex:10, bgcolor:"background.default", backdropFilter:"blur(16px)" }}>
           <Box sx={{ display:"flex", alignItems:"center", gap:1 }}>
             <IconButton onClick={()=>setMobileOpen(true)} sx={{display:{md:"none"}, mr:.5}}><MenuRounded /></IconButton>
             <Typography sx={{display:{xs:"none",sm:"block"},fontWeight:700,color:"text.secondary"}}>{t("appTag")}</Typography>
           </Box>
-          <LanguageSwitcher />
+          <Box sx={{ display:"flex", alignItems:"center", gap:.6 }}>
+            <NotificationCenter />
+            <Tooltip title={mode === "light" ? "Use dark mode" : "Use light mode"}>
+              <IconButton onClick={toggleMode} aria-label="Toggle theme">
+                {mode === "light" ? <DarkModeRounded /> : <LightModeRounded />}
+              </IconButton>
+            </Tooltip>
+            <LanguageSwitcher />
+          </Box>
         </Box>
         <Box sx={{ px:{xs:2,md:4}, pb:5, maxWidth:1500, mx:"auto" }}>{children}</Box>
       </Box>

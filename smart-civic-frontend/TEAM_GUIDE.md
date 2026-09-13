@@ -348,3 +348,48 @@ components.
 
 If a new component is added, match these proportions rather than automatically using
 a very large `borderRadius`.
+
+## 17. New frontend features in the enhanced prototype
+
+### Theme
+Light/dark mode is handled by `src/theme/ThemeModeContext.jsx` and persisted in
+localStorage. It is a UI preference; the backend does not need to implement it.
+
+### Notifications
+`NotificationCenter.jsx` is a visual inbox. Replace its local notification array
+with a notifications API when the backend is ready.
+
+### Complaint filters
+`ComplaintsPage.jsx` supports search, status, priority, category and sorting. When
+there are many records, move these filters to FastAPI query parameters rather than
+loading the entire dataset into the browser.
+
+### Smart Assist
+`SmartAssistCard.jsx` demonstrates the optional AI requirement. The deterministic
+prototype is deliberately easy to replace with a POST request to an AI endpoint.
+
+### Location
+The report form can request browser GPS permission. The backend can later reverse-
+geocode coordinates into a street/area and store the coordinates separately.
+
+### Photos
+The report form previews one selected image locally. The backend should accept the
+actual multipart upload and return a stable attachment URL.
+
+### Drafts
+Unfinished complaint form data is saved locally under `civicflow-complaint-draft`.
+Do not treat this as the source of truth; server-side drafts can be added later.
+
+### Analytics / hotspot view
+The admin dashboard includes a lightweight visual hotspot placeholder. If the team
+adds a real map provider, keep the map in its own component and feed it backend
+coordinates instead of mixing GIS logic into the dashboard page.
+
+## Final frontend handoff notes
+
+- This folder is frontend-only and uses mock data until the FastAPI team connects services.
+- The React Vite plugin is required; do not remove it.
+- The citizen dashboard uses `ConstructionRounded` for the road service shortcut.
+- Only the top-right global language selector should be used; do not add a duplicate sidebar selector.
+- Keep neomorphism restrained: large surfaces use moderate corners, forms are not pill-shaped.
+- `RUN-CIVICFLOW.bat` can install dependencies on the first run and start Vite on Windows.

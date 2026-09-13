@@ -21,38 +21,54 @@ import App from "./App";
 import i18n from "./i18n/i18n";
 import "./index.css";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { ThemeModeProvider, useThemeMode } from "./theme/ThemeModeContext";
 
-const theme = createTheme({
-  palette: {
-    mode: "light",
-    primary: { main: "#315f8c" },
-    secondary: { main: "#6d5dfc" },
-    success: { main: "#2e8b72" },
-    warning: { main: "#d58b32" },
-    error: { main: "#c94b59" },
-    background: { default: "#e7edf4", paper: "#e7edf4" },
-    text: { primary: "#233044", secondary: "#66758a" }
-  },
-  typography: {
-    fontFamily: '"Inter", "Noto Sans Devanagari", "Noto Sans", system-ui, sans-serif',
-    h1: { fontWeight: 800, letterSpacing: "-0.04em" },
-    h2: { fontWeight: 800, letterSpacing: "-0.035em" },
-    h3: { fontWeight: 750, letterSpacing: "-0.025em" },
-    button: { textTransform: "none", fontWeight: 700 }
-  },
-  shape: { borderRadius: 18 }
-});
+function AppProviders() {
+  const { mode } = useThemeMode();
+  const dark = mode === "dark";
+
+  const theme = createTheme({
+    palette: {
+      mode,
+      primary: { main: dark ? "#7eb7ee" : "#315f8c" },
+      secondary: { main: dark ? "#a99cff" : "#6d5dfc" },
+      success: { main: dark ? "#67c8a8" : "#2e8b72" },
+      warning: { main: dark ? "#efb85b" : "#d58b32" },
+      error: { main: dark ? "#f07d89" : "#c94b59" },
+      background: { default: dark ? "#151c26" : "#e7edf4", paper: dark ? "#1b2430" : "#e7edf4" },
+      text: { primary: dark ? "#edf3fb" : "#233044", secondary: dark ? "#aebbd0" : "#66758a" }
+    },
+    typography: {
+      fontFamily: '"Inter", "Noto Sans Devanagari", "Noto Sans", system-ui, sans-serif',
+      h1: { fontWeight: 800, letterSpacing: "-0.04em" },
+      h2: { fontWeight: 800, letterSpacing: "-0.035em" },
+      h3: { fontWeight: 750, letterSpacing: "-0.025em" },
+      button: { textTransform: "none", fontWeight: 700 }
+    },
+    shape: { borderRadius: 14 },
+    components: {
+      MuiPaper: { styleOverrides: { root: { backgroundImage: "none" } } },
+      MuiOutlinedInput: { styleOverrides: { root: { borderRadius: 14 } } }
+    }
+  });
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ThemeProvider>
+  );
+}
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ErrorBoundary>
       <I18nextProvider i18n={i18n}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </ThemeProvider>
+        <ThemeModeProvider>
+          <AppProviders />
+        </ThemeModeProvider>
       </I18nextProvider>
     </ErrorBoundary>
   </React.StrictMode>
