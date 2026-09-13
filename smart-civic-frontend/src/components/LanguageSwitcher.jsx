@@ -31,7 +31,7 @@ export default function LanguageSwitcher() {
         startAdornment={<TranslateRounded size={18} style={{marginRight:8}} />}
         sx={{
           borderRadius: 1.8,
-          bgcolor: "#edf2f7",
+          bgcolor: "background.paper",
           boxShadow: "inset 3px 3px 7px rgba(163,177,198,.25), inset -3px -3px 7px rgba(255,255,255,.85)",
           "& fieldset": { border: "none" }
         }}
