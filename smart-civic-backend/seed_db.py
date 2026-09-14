@@ -8,7 +8,8 @@ INITIAL_COMPLAINTS = [
   { 
     "id": "CIV-2026-1048", 
     "title": "Streetlight not working near Gate 3", 
-    "category": "Streetlight", 
+    "category": "Other",
+    "custom_category": "Streetlight",
     "location": "Sector 18, Noida", 
     "priority": "High", 
     "status": "In Progress", 
@@ -31,7 +32,7 @@ INITIAL_COMPLAINTS = [
   { 
     "id": "CIV-2026-1047", 
     "title": "Large pothole causing traffic slowdown", 
-    "category": "Pothole / Road", 
+    "category": "Pothole",
     "location": "MG Road Junction", 
     "priority": "High", 
     "status": "Assigned", 
@@ -53,7 +54,7 @@ INITIAL_COMPLAINTS = [
   { 
     "id": "CIV-2026-1046", 
     "title": "Garbage not collected for 3 days", 
-    "category": "Garbage / Waste", 
+    "category": "Garbage",
     "location": "Sector 62 Market", 
     "priority": "Medium", 
     "status": "New", 
@@ -74,7 +75,8 @@ INITIAL_COMPLAINTS = [
   { 
     "id": "CIV-2026-1045", 
     "title": "Low water pressure in Block B", 
-    "category": "Water Supply", 
+    "category": "Other",
+    "custom_category": "Water Supply",
     "location": "Block B, Sector 50", 
     "priority": "Medium", 
     "status": "In Progress", 
@@ -96,7 +98,8 @@ INITIAL_COMPLAINTS = [
   { 
     "id": "CIV-2026-1044", 
     "title": "Open drain cover beside school", 
-    "category": "Drainage", 
+    "category": "Other",
+    "custom_category": "Drainage",
     "location": "Saraswati School Road", 
     "priority": "High", 
     "status": "Resolved", 

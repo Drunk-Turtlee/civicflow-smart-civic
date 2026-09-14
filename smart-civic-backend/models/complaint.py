@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 class Comment(BaseModel):
@@ -14,12 +14,14 @@ class TimelineEvent(BaseModel):
 
 class ComplaintCreate(BaseModel):
     title: Optional[str] = None
-    category: str  # Streetlight, Pothole / Road, Garbage / Waste, Water Supply, Drainage, Other
+    category: str  # Road Damage, Garbage, Pothole, Other
+    custom_category: Optional[str] = None
     description: str
     location: str
     priority: Optional[str] = "Medium"  # High, Medium, Low
     anonymous: bool = False
     photo_url: Optional[str] = None
+    image_verification: Optional[Dict[str, Any]] = None
     created_by: Optional[str] = None
     created_by_email: Optional[str] = None
 
@@ -36,16 +38,18 @@ class ComplaintResponse(BaseModel):
     id: str
     title: str
     category: str
+    custom_category: Optional[str] = None
     location: str
     priority: str
     status: str
     age: int
     assigned: str
-    score: int
+    score: float
     time: str
     description: str
     anonymous: bool = False
     photo_url: Optional[str] = None
+    image_verification: Optional[Dict[str, Any]] = None
     created_by: Optional[str] = None
     created_by_email: Optional[str] = None
     created_at: datetime

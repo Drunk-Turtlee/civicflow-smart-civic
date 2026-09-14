@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
+
+    # Cloudinary Settings
+    CLOUDINARY_CLOUD_NAME: str = os.getenv("CLOUDINARY_CLOUD_NAME", "")
+    CLOUDINARY_API_KEY: str = os.getenv("CLOUDINARY_API_KEY", "")
+    CLOUDINARY_API_SECRET: str = os.getenv("CLOUDINARY_API_SECRET", "")
     
     # CORS
     BACKEND_CORS_ORIGINS: list[str] = [

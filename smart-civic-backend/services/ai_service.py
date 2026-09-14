@@ -8,16 +8,12 @@ def analyze_complaint_text(description: str) -> Dict[str, Any]:
     text = description.lower()
     
     # 1. Category extraction
-    if any(k in text for k in ["light", "dark", "lamp", "pole"]):
-        category = "Streetlight"
-    elif any(k in text for k in ["pothole", "road", "tar", "asphalt", "hole", "lane", "traffic"]):
-        category = "Pothole / Road"
+    if any(k in text for k in ["pothole", "hole"]):
+        category = "Pothole"
+    elif any(k in text for k in ["road", "tar", "asphalt", "lane", "traffic", "crack"]):
+        category = "Road Damage"
     elif any(k in text for k in ["garbage", "waste", "trash", "dump", "bin", "clean"]):
-        category = "Garbage / Waste"
-    elif any(k in text for k in ["water", "pipe", "tap", "leak", "supply", "pressure"]):
-        category = "Water Supply"
-    elif any(k in text for k in ["drain", "sewage", "gutter", "overflow", "stagnant"]):
-        category = "Drainage"
+        category = "Garbage"
     else:
         category = "Other"
         

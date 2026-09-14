@@ -13,7 +13,7 @@ async def get_stats():
         
     active = await db["complaints"].count_documents({"status": {"$ne": "Resolved"}})
     resolved = await db["complaints"].count_documents({"status": "Resolved"})
-    urgent = await db["complaints"].count_documents({"priority": "High", "status": {"$ne": "Resolved"}})
+    urgent = await db["complaints"].count_documents({"priority": {"$in": ["Critical", "High"]}, "status": {"$ne": "Resolved"}})
     
     # If database is fresh, provide seeded/baseline counts
     if active == 0 and resolved == 0:
@@ -31,11 +31,10 @@ async def get_distribution():
     db = get_database()
     if db is None:
         return [
-            DistributionItem(category="Garbage / Waste", count=34),
-            DistributionItem(category="Streetlight", count=24),
-            DistributionItem(category="Pothole / Road", count=19),
-            DistributionItem(category="Water Supply", count=13),
-            DistributionItem(category="Drainage", count=10)
+            DistributionItem(category="Garbage", count=34),
+            DistributionItem(category="Road Damage", count=24),
+            DistributionItem(category="Pothole", count=19),
+            DistributionItem(category="Other", count=23)
         ]
         
     pipeline = [
@@ -46,11 +45,10 @@ async def get_distribution():
     
     if not results:
         return [
-            DistributionItem(category="Garbage / Waste", count=34),
-            DistributionItem(category="Streetlight", count=24),
-            DistributionItem(category="Pothole / Road", count=19),
-            DistributionItem(category="Water Supply", count=13),
-            DistributionItem(category="Drainage", count=10)
+            DistributionItem(category="Garbage", count=34),
+            DistributionItem(category="Road Damage", count=24),
+            DistributionItem(category="Pothole", count=19),
+            DistributionItem(category="Other", count=23)
         ]
         
     return [DistributionItem(category=item["_id"], count=item["count"]) for item in results]
@@ -58,11 +56,10 @@ async def get_distribution():
 @router.get("/sla", response_model=List[SLAItem])
 async def get_sla():
     return [
-        SLAItem(category="Streetlight", percentage=96.2),
-        SLAItem(category="Water Supply", percentage=94.0),
-        SLAItem(category="Garbage / Waste", percentage=91.5),
-        SLAItem(category="Pothole / Road", percentage=88.4),
-        SLAItem(category="Drainage", percentage=86.0)
+        SLAItem(category="Road Damage", percentage=88.4),
+        SLAItem(category="Garbage", percentage=91.5),
+        SLAItem(category="Pothole", percentage=86.0),
+        SLAItem(category="Other", percentage=80.0)
     ]
 
 @router.get("/hotspots", response_model=List[HotspotItem])
