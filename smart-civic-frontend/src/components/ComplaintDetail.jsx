@@ -78,6 +78,27 @@ export default function ComplaintDetail({ complaint, admin=false, onBack }) {
         <Divider sx={{my:2}} />
         <Typography fontWeight={850} sx={{mb:1}}>Description</Typography><Typography color="text.secondary" sx={{lineHeight:1.8,maxWidth:900}}>{complaint.description}</Typography>
 
+        {complaint.photo_url && (
+          <Box sx={{ mt:3 }}>
+            <Typography fontWeight={850} sx={{ mb:1 }}>Attached photo</Typography>
+            <Box
+              component="img"
+              src={complaint.photo_url}
+              alt={`Complaint ${complaint.id}`}
+              sx={{
+                width:"100%",
+                maxWidth:640,
+                maxHeight:360,
+                objectFit:"cover",
+                borderRadius:1.5,
+                display:"block",
+                border:"1px solid",
+                borderColor:"divider",
+              }}
+            />
+          </Box>
+        )}
+
         {admin && <Box sx={{mt:3,display:"grid",gridTemplateColumns:{xs:"1fr",md:"1fr 1fr"},gap:2}}>
           <Box className="neo-inset" sx={{p:2,borderRadius:1.7}}>
             <Typography fontWeight={800} sx={{mb:1}}>Operations update</Typography>

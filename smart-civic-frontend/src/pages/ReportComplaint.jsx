@@ -29,6 +29,7 @@ import { addComplaint, getCurrentUser } from "../data/complaintsStore";
 
 const DRAFT_KEY = "civicflow-complaint-draft";
 const MAX_DESCRIPTION = 1000;
+const COMPLAINTS_API = "http://localhost:8000/api/complaints";
 
 export default function ReportComplaint() {
   const { t } = useTranslation();
@@ -39,6 +40,9 @@ export default function ReportComplaint() {
   const [submitted, setSubmitted] = useState(false);
   const [createdId, setCreatedId] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [photoVerifying, setPhotoVerifying] = useState(false);
+  const [photoVerification, setPhotoVerification] = useState(null);
+  const [photoError, setPhotoError] = useState("");
   const [locationLoading, setLocationLoading] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
 
@@ -77,16 +81,52 @@ export default function ReportComplaint() {
     );
   };
 
+  const verifyPhoto = async (file) => {
+    setPhotoVerifying(true);
+    setPhotoVerification(null);
+    setPhotoError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const token = localStorage.getItem("civic_token");
+      const headers = {};
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      const response = await fetch(`${COMPLAINTS_API}/verify-image`, {
+        method: "POST",
+        headers,
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.detail || "Image verification failed.");
+      }
+
+      setPhotoVerification(result);
+    } catch (err) {
+      setPhotoError(err.message || "Image verification failed.");
+    } finally {
+      setPhotoVerifying(false);
+    }
+  };
+
   const choosePhoto = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
     const preview = URL.createObjectURL(file);
     setPhoto({ file, preview });
+    verifyPhoto(file);
   };
 
   const removePhoto = () => {
     if (photo?.preview) URL.revokeObjectURL(photo.preview);
     setPhoto(null);
+    setPhotoVerification(null);
+    setPhotoError("");
+    setPhotoVerifying(false);
     if (fileInput.current) fileInput.current.value = "";
   };
 
@@ -99,7 +139,7 @@ export default function ReportComplaint() {
     setSubmitting(true);
     try {
       const user = getCurrentUser();
-      const newRecord = await addComplaint({ ...form, photo: photo?.preview }, user);
+      const newRecord = await addComplaint({ ...form, photo: photoVerification?.image_url || null, imageVerification: photoVerification }, user);
       setCreatedId(newRecord?.id || "CIV-2026-1049");
       localStorage.removeItem(DRAFT_KEY);
       setSubmitting(false);
@@ -176,6 +216,15 @@ export default function ReportComplaint() {
                 <Button size="small" color="error" onClick={removePhoto} startIcon={<DeleteOutlineRounded />}>Remove</Button>
               </Box>
             )}
+            {photoVerifying && <Alert severity="info" sx={{ mt:1, borderRadius:1.5 }}>Verifying image...</Alert>}
+            {photoVerification && (
+              <Alert severity={photoVerification.verified ? "success" : "warning"} sx={{ mt:1, borderRadius:1.5 }}>
+                {photoVerification.verified
+                  ? `Verified: ${photoVerification.detections?.map(item => item.class).join(", ")}`
+                  : "No supported civic issue detected in this image."}
+              </Alert>
+            )}
+            {photoError && <Alert severity="error" sx={{ mt:1, borderRadius:1.5 }}>{photoError}</Alert>}
           </Grid>
           <Grid size={{xs:12,md:5}} sx={{ display:"flex", alignItems:"center" }}>
             <FormControlLabel control={<Checkbox checked={form.anonymous} onChange={e=>set("anonymous",e.target.checked)} />} label={t("anonymous")} />
@@ -190,7 +239,7 @@ export default function ReportComplaint() {
               </Box>
               <Box sx={{ display:"flex", gap:1.5 }}>
                 <Button type="button" onClick={()=>navigate("/citizen")} sx={{ borderRadius:1.5 }}>{t("cancel")}</Button>
-                <Button type="submit" variant="contained" size="large" disabled={submitting || !form.description.trim() || !form.location.trim()} endIcon={submitting ? <AutoAwesomeRounded /> : <SendRounded />} sx={{ borderRadius:1.5, px:3 }}>
+                <Button type="submit" variant="contained" size="large" disabled={submitting || photoVerifying || !form.description.trim() || !form.location.trim()} endIcon={submitting ? <AutoAwesomeRounded /> : <SendRounded />} sx={{ borderRadius:1.5, px:3 }}>
                   {submitting ? "Submitting..." : t("submit")}
                 </Button>
               </Box>

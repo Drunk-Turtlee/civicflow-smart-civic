@@ -1,0 +1,10 @@
+# Backend .env
+MONGODB_URL=mongodb+srv://<db_username>:<db_password>@<cluster-host>/?retryWrites=true&w=majority
+DATABASE_NAME=smart_civic_db
+
+JWT_SECRET_KEY=change_this_to_a_long_random_secret
+GOOGLE_CLIENT_ID=<google_oauth_client_id>
+
+CLOUDINARY_CLOUD_NAME=<cloudinary_cloud_name>
+CLOUDINARY_API_KEY=<cloudinary_api_key>
+CLOUDINARY_API_SECRET=<cloudinary_api_secret>

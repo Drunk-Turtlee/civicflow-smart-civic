@@ -182,6 +182,7 @@ export async function addComplaint(formData, user = getCurrentUser()) {
     priority: formData.priority || "Medium",
     anonymous: !!formData.anonymous,
     photo_url: formData.photo || null,
+    image_verification: formData.imageVerification || null,
     created_by: creatorName,
     created_by_email: creatorEmail,
   };
@@ -227,7 +228,8 @@ export async function addComplaint(formData, user = getCurrentUser()) {
       created_by: creatorName,
       created_by_email: creatorEmail,
       created_at: new Date().toISOString(),
-      photo: formData.photo || null,
+      photo_url: formData.photo || null,
+      image_verification: formData.imageVerification || null,
     };
   }
 
