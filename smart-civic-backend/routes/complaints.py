@@ -47,7 +47,8 @@ async def create_complaint(
     time_str = "Just now"
     
     title = payload.title or f"{payload.category} issue reported at {payload.location}"
-    creator = "Anonymous" if payload.anonymous else (current_user.get("name", "Citizen") if current_user else "Citizen")
+    creator = "Anonymous" if payload.anonymous else (payload.created_by or (current_user.get("name", "Citizen") if current_user else "Citizen"))
+    creator_email = payload.created_by_email or (current_user.get("email", "") if current_user else "")
     
     doc = {
         "id": cid,
@@ -64,6 +65,7 @@ async def create_complaint(
         "anonymous": payload.anonymous,
         "photo_url": payload.photo_url,
         "created_by": creator,
+        "created_by_email": creator_email.strip().lower() if creator_email else "",
         "created_at": now,
         "updated_at": now,
         "comments": [],
@@ -89,6 +91,7 @@ async def list_complaints(
     status_filter: Optional[str] = Query("All", alias="status"),
     priority_filter: Optional[str] = Query("All", alias="priority"),
     category_filter: Optional[str] = Query("All", alias="category"),
+    created_by_email: Optional[str] = Query(None, description="Filter by creator email"),
     sort_by: Optional[str] = Query("newest", alias="sort")
 ):
     db = get_database()
@@ -100,6 +103,8 @@ async def list_complaints(
             query_dict["priority"] = priority_filter
         if category_filter and category_filter != "All":
             query_dict["category"] = category_filter
+        if created_by_email and created_by_email.strip():
+            query_dict["created_by_email"] = created_by_email.strip().lower()
             
         if q and q.strip():
             search_regex = {"$regex": q.strip(), "$options": "i"}
@@ -129,6 +134,8 @@ async def list_complaints(
             results = [x for x in results if x.get("priority") == priority_filter]
         if category_filter and category_filter != "All":
             results = [x for x in results if x.get("category") == category_filter]
+        if created_by_email and created_by_email.strip():
+            results = [x for x in results if x.get("created_by_email", "").lower() == created_by_email.strip().lower()]
         if q and q.strip():
             term = q.strip().lower()
             results = [x for x in results if any(term in str(x.get(k, "")).lower() for k in ["id", "title", "location", "category", "description"])]

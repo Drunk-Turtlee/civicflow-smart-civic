@@ -25,6 +25,7 @@ import DraftsOutlined from "@mui/icons-material/DraftsOutlined";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import SmartAssistCard from "../components/SmartAssistCard";
+import { addComplaint, getCurrentUser } from "../data/complaintsStore";
 
 const DRAFT_KEY = "civicflow-complaint-draft";
 const MAX_DESCRIPTION = 1000;
@@ -36,6 +37,7 @@ export default function ReportComplaint() {
   const [form, setForm] = useState({ category:"Streetlight", description:"", location:"", priority:"Medium", anonymous:false });
   const [photo, setPhoto] = useState(null);
   const [submitted, setSubmitted] = useState(false);
+  const [createdId, setCreatedId] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
@@ -64,8 +66,6 @@ export default function ReportComplaint() {
     setLocationLoading(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        // We only show coordinates in the prototype. Reverse geocoding belongs to
-        // the backend/location service and can be plugged in later.
         set("location", `GPS: ${position.coords.latitude.toFixed(5)}, ${position.coords.longitude.toFixed(5)}`);
         setLocationLoading(false);
       },
@@ -94,17 +94,21 @@ export default function ReportComplaint() {
     setForm((current) => ({ ...current, category: result.category, priority: result.urgency, description: result.summary }));
   };
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
     setSubmitting(true);
-    // Replace this timeout with complaintService.createComplaint(form, photo.file)
-    // when the FastAPI endpoint is ready.
-    setTimeout(() => {
+    try {
+      const user = getCurrentUser();
+      const newRecord = await addComplaint({ ...form, photo: photo?.preview }, user);
+      setCreatedId(newRecord?.id || "CIV-2026-1049");
       localStorage.removeItem(DRAFT_KEY);
       setSubmitting(false);
       setSubmitted(true);
-      setTimeout(() => navigate("/citizen/complaints"), 1200);
-    }, 850);
+      setTimeout(() => navigate("/citizen/complaints"), 1300);
+    } catch (err) {
+      console.error("Complaint submit error:", err);
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -115,7 +119,7 @@ export default function ReportComplaint() {
       </Box>
 
       {submitted && <Alert severity="success" sx={{ mb:2, borderRadius:1.5 }}>
-        Complaint submitted successfully. Your reference is <strong>CIV-2026-1049</strong>.
+        Complaint submitted successfully. Your reference is <strong>{createdId || "CIV-2026-1049"}</strong>.
       </Alert>}
 
       <Box component="form" onSubmit={submit} className="neo" sx={{ p:{xs:2,md:3.5}, borderRadius:2 }}>

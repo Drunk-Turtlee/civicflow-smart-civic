@@ -1,16 +1,6 @@
-// -----------------------------------------------------------------------------
-// App.jsx — Application routes
-// -----------------------------------------------------------------------------
-// Keep this file focused on routing.
-// Pages contain screen-level UI; components contain reusable UI.
-//
-// IMPORTANT:
-// The routes below are frontend routes only. They are NOT FastAPI endpoints.
-// React Router decides which screen is displayed in the browser.
-// -----------------------------------------------------------------------------
-
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import AppShell from "./components/AppShell";
+import LoginPage from "./pages/LoginPage";
 import CitizenDashboard from "./pages/CitizenDashboard";
 import ReportComplaint from "./pages/ReportComplaint";
 import ComplaintsPage from "./pages/ComplaintsPage";
@@ -19,10 +9,21 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 import SettingsPage from "./pages/SettingsPage";
 
 export default function App() {
+  const location = useLocation();
+  const isLoginPage = location.pathname === "/login";
+
+  if (isLoginPage) {
+    return (
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+      </Routes>
+    );
+  }
+
   return (
     <AppShell>
       <Routes>
-        <Route path="/" element={<Navigate to="/citizen" replace />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/citizen" element={<CitizenDashboard />} />
         <Route path="/citizen/report" element={<ReportComplaint />} />
         <Route path="/citizen/complaints" element={<ComplaintsPage />} />
@@ -31,7 +32,7 @@ export default function App() {
         <Route path="/admin/complaints" element={<ComplaintsPage admin />} />
         <Route path="/admin/analytics" element={<AnalyticsPage />} />
         <Route path="/admin/settings" element={<SettingsPage />} />
-        <Route path="*" element={<Navigate to="/citizen" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </AppShell>
   );

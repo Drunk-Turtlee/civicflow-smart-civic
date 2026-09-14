@@ -20,6 +20,8 @@ class ComplaintCreate(BaseModel):
     priority: Optional[str] = "Medium"  # High, Medium, Low
     anonymous: bool = False
     photo_url: Optional[str] = None
+    created_by: Optional[str] = None
+    created_by_email: Optional[str] = None
 
 class ComplaintUpdate(BaseModel):
     status: Optional[str] = None  # New, Assigned, In Progress, Resolved
@@ -45,6 +47,7 @@ class ComplaintResponse(BaseModel):
     anonymous: bool = False
     photo_url: Optional[str] = None
     created_by: Optional[str] = None
+    created_by_email: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     comments: List[Comment] = []
