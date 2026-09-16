@@ -172,7 +172,12 @@ export default function ReportComplaint() {
   };
 
   const applyAssist = (result) => {
-    setForm((current) => ({ ...current, category: CATEGORIES.includes(result.category) ? result.category : "Other", description: result.summary }));
+    setForm((current) => ({
+      ...current,
+      category: CATEGORIES.includes(result.category) ? result.category : "Other",
+      priority: result.urgency || current.priority,
+      description: result.summary,
+    }));
   };
 
   const submit = async (event) => {

@@ -22,7 +22,6 @@ import WarningAmberRounded from "@mui/icons-material/WarningAmberRounded";
 import CheckCircleRounded from "@mui/icons-material/CheckCircleRounded";
 import AccessTimeRounded from "@mui/icons-material/AccessTimeRounded";
 import { useTranslation } from "react-i18next";
-import { distribution } from "../data/mockData";
 import { fetchAnalytics, generateAIReport } from "../services/reportService";
 
 const PERIODS = [
@@ -32,34 +31,17 @@ const PERIODS = [
   { value: "monthly", label: "Monthly" },
 ];
 
-const fallbackReport = {
-  period: "weekly",
-  period_label: "Weekly",
-  summary: { total: 4746, resolved: 3462, pending: 1284, urgent: 147, resolution_rate: 72.9 },
-  categories: distribution.map(([category, count]) => ({ category, count })),
-  statuses: [
-    { status: "Resolved", count: 3462 },
-    { status: "In Progress", count: 740 },
-    { status: "Assigned", count: 316 },
-    { status: "New", count: 228 },
-  ],
-  priorities: [
-    { priority: "High", count: 147 },
-    { priority: "Medium", count: 918 },
-    { priority: "Low", count: 219 },
-  ],
-  trend: [34, 39, 42, 38, 47, 53, 49, 61, 58, 66, 72, 68].map((count, index) => ({
-    date: `Period ${index + 1}`,
-    count,
-  })),
-  hotspots: [
-    { location: "Sector 18, Noida", count: 42 },
-    { location: "MG Road Junction", count: 37 },
-    { location: "Sector 62 Market", count: 29 },
-    { location: "Block B, Sector 50", count: 24 },
-  ],
-  aging: { "0-2 days": 38, "3-7 days": 31, "8-14 days": 21, ">14 days": 10 },
-};
+const emptyReport = (period = "weekly") => ({
+  period,
+  period_label: PERIODS.find((item) => item.value === period)?.label || period,
+  summary: { total: 0, resolved: 0, pending: 0, urgent: 0, resolution_rate: 0 },
+  categories: [],
+  statuses: [],
+  priorities: [],
+  trend: [],
+  hotspots: [],
+  aging: { "0-2 days": 0, "3-7 days": 0, "8-14 days": 0, ">14 days": 0 },
+});
 
 function KpiCard({ icon, label, value, helper }) {
   return (
@@ -130,7 +112,7 @@ function TrendBars({ trend }) {
 export default function AnalyticsPage() {
   const { t } = useTranslation();
   const [period, setPeriod] = useState("weekly");
-  const [report, setReport] = useState(fallbackReport);
+  const [report, setReport] = useState(emptyReport("weekly"));
   const [loading, setLoading] = useState(false);
   const [reportLoading, setReportLoading] = useState(false);
   const [error, setError] = useState("");
@@ -142,8 +124,8 @@ export default function AnalyticsPage() {
     try {
       setReport(await fetchAnalytics(period));
     } catch (err) {
-      setReport({ ...fallbackReport, period, period_label: PERIODS.find((item) => item.value === period)?.label || period });
-      setError(`${err.message || "Unable to load analytics."} Showing local demo data.`);
+      setReport(emptyReport(period));
+      setError(err.message || "Unable to load analytics.");
     } finally {
       setLoading(false);
     }

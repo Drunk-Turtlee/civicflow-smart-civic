@@ -22,87 +22,7 @@ function normalizeComplaint(item) {
   return { ...item, ...normalized };
 }
 
-// Default initial complaints owned by the demo citizen (Ramesh Gupta)
-const DEFAULT_COMPLAINTS = [
-  {
-    id: "CIV-2026-1048",
-    title: "Streetlight not working near Gate 3",
-    category: "Other",
-    custom_category: "Streetlight",
-    location: "Sector 18, Noida",
-    priority: "High",
-    status: "In Progress",
-    age: 6,
-    assigned: "Ravi Kumar",
-    score: 92,
-    time: "Today, 9:42 AM",
-    description: "There has been no street light near Gate 3 for almost a week and the road gets extremely dark.",
-    created_by: "Ramesh Gupta",
-    created_by_email: "citizen@civicflow.org",
-  },
-  {
-    id: "CIV-2026-1047",
-    title: "Large pothole causing traffic slowdown",
-    category: "Pothole",
-    location: "MG Road Junction",
-    priority: "High",
-    status: "Assigned",
-    age: 3,
-    assigned: "Roads Team A",
-    score: 86,
-    time: "Today, 8:15 AM",
-    description: "Deep pothole on the left lane near the signal. Two-wheelers are struggling to pass.",
-    created_by: "Ramesh Gupta",
-    created_by_email: "citizen@civicflow.org",
-  },
-  {
-    id: "CIV-2026-1046",
-    title: "Garbage not collected for 3 days",
-    category: "Garbage",
-    location: "Sector 62 Market",
-    priority: "Medium",
-    status: "New",
-    age: 3,
-    assigned: "Unassigned",
-    score: 74,
-    time: "Yesterday, 6:30 PM",
-    description: "The community bins are overflowing and garbage has not been collected since Monday.",
-    created_by: "Ramesh Gupta",
-    created_by_email: "citizen@civicflow.org",
-  },
-  {
-    id: "CIV-2026-1045",
-    title: "Low water pressure in Block B",
-    category: "Other",
-    custom_category: "Water Supply",
-    location: "Block B, Sector 50",
-    priority: "Medium",
-    status: "In Progress",
-    age: 8,
-    assigned: "Water Works 2",
-    score: 78,
-    time: "Yesterday, 10:18 AM",
-    description: "Water pressure has been very low every morning for more than a week.",
-    created_by: "Anit Singh",
-    created_by_email: "anit@smartcivic.org",
-  },
-  {
-    id: "CIV-2026-1044",
-    title: "Drainage overflow beside school",
-    category: "Other",
-    custom_category: "Drainage",
-    location: "Saraswati School Road",
-    priority: "High",
-    status: "Resolved",
-    age: 12,
-    assigned: "Civic Safety Team",
-    score: 96,
-    time: "2 days ago",
-    description: "Drain cover missing and water overflowing beside school entrance.",
-    created_by: "Priya Sharma",
-    created_by_email: "priya@smartcivic.org",
-  },
-];
+const DEFAULT_COMPLAINTS = [];
 
 // Get current logged-in user from localStorage
 export function getCurrentUser() {
@@ -152,12 +72,6 @@ export function getUserComplaints(user = getCurrentUser()) {
     return all;
   }
 
-  // If citizen is the demo user "citizen@civicflow.org" or "Ramesh Gupta", show demo complaints
-  if (user?.email === "citizen@civicflow.org" || user?.name === "Ramesh Gupta") {
-    return all.filter(c => c.created_by_email === "citizen@civicflow.org" || c.created_by === "Ramesh Gupta");
-  }
-
-  // Any other registered user only sees their own complaints
   return all.filter(
     (c) =>
       (user?.email && c.created_by_email?.toLowerCase() === user.email.toLowerCase()) ||
@@ -233,9 +147,10 @@ export async function addComplaint(formData, user = getCurrentUser()) {
   // 2. Fallback / Local sync
   if (!savedComplaint) {
     const all = getAllComplaints();
-    const newSeq = all.length + 1049;
+    const year = new Date().getFullYear();
+    const newSeq = String(all.length + 1).padStart(4, "0");
     savedComplaint = {
-      id: `CIV-2026-${newSeq}`,
+      id: `CIV-${year}-${newSeq}`,
       title: formData.description.slice(0, 48) + (formData.description.length > 48 ? "..." : ""),
       category: formData.category || "General",
       custom_category: formData.customCategory || null,
@@ -244,7 +159,7 @@ export async function addComplaint(formData, user = getCurrentUser()) {
       status: "New",
       age: 0,
       assigned: "Unassigned",
-      score: formData.priority === "High" ? 90 : formData.priority === "Medium" ? 75 : 55,
+      score: 0,
       time: "Just now",
       description: formData.description,
       anonymous: !!formData.anonymous,

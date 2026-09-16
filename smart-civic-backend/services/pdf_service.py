@@ -154,6 +154,10 @@ def build_pdf(analytics: Dict[str, Any], ai_report: Dict[str, Any]) -> bytes:
     story.append(Paragraph("Executive Summary", styles["Section"]))
     story.append(Paragraph(_safe(ai_report.get("executive_summary")), styles["BodyCivic"]))
 
+    story.append(Paragraph("Key Metrics Overview", styles["Section"]))
+    for item in ai_report.get("key_metrics_overview", []):
+        story.append(Paragraph(f"- {item}", styles["BulletCivic"]))
+
     story.append(Paragraph("Key Findings", styles["Section"]))
     for item in ai_report.get("key_findings", []):
         story.append(Paragraph(f"- {item}", styles["BulletCivic"]))
@@ -166,6 +170,14 @@ def build_pdf(analytics: Dict[str, Any], ai_report: Dict[str, Any]) -> bytes:
     story.append(_line_chart("Complaint trend", trend))
 
     story.append(PageBreak())
+    story.append(Paragraph("Trend Analysis", styles["Section"]))
+    for item in ai_report.get("trend_analysis", []):
+        story.append(Paragraph(f"- {item}", styles["BulletCivic"]))
+
+    story.append(Paragraph("Category / Departmental Breakdown", styles["Section"]))
+    for item in ai_report.get("category_breakdown", []):
+        story.append(Paragraph(f"- {item}", styles["BulletCivic"]))
+
     story.append(Paragraph("Operational Risk & Hotspots", styles["Section"]))
     for item in ai_report.get("hotspot_insights", []):
         story.append(Paragraph(f"- {item}", styles["BulletCivic"]))
@@ -216,6 +228,9 @@ def build_pdf(analytics: Dict[str, Any], ai_report: Dict[str, Any]) -> bytes:
 
     story.append(Paragraph("Conclusion", styles["Section"]))
     story.append(Paragraph(_safe(ai_report.get("conclusion")), styles["BodyCivic"]))
+    story.append(Paragraph("Data Notes", styles["Section"]))
+    for item in ai_report.get("data_notes", []):
+        story.append(Paragraph(f"- {item}", styles["BulletCivic"]))
     story.append(Spacer(1, 5 * mm))
     story.append(Paragraph("Note: Numerical values in this report are sourced from CivicFlow's analytics layer. AI-generated sections are interpretive and should be reviewed by municipal staff before formal action.", styles["Small"]))
 

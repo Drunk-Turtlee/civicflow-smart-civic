@@ -17,47 +17,6 @@ PERIOD_LABELS = {
     "monthly": "Monthly",
 }
 
-FALLBACK_REPORT = {
-    "summary": {"total": 4746, "resolved": 3462, "pending": 1284, "urgent": 147, "resolution_rate": 72.9},
-    "categories": [
-        {"category": "Garbage", "count": 34},
-        {"category": "Road Damage", "count": 24},
-        {"category": "Pothole", "count": 19},
-        {"category": "Other", "count": 23},
-    ],
-    "statuses": [
-        {"status": "Resolved", "count": 3462},
-        {"status": "In Progress", "count": 740},
-        {"status": "Assigned", "count": 316},
-        {"status": "New", "count": 228},
-    ],
-    "priorities": [
-        {"priority": "High", "count": 147},
-        {"priority": "Medium", "count": 918},
-        {"priority": "Low", "count": 219},
-    ],
-    "trend": [
-        {"date": "2026-08-19", "count": 34},
-        {"date": "2026-08-22", "count": 39},
-        {"date": "2026-08-25", "count": 42},
-        {"date": "2026-08-28", "count": 38},
-        {"date": "2026-08-31", "count": 47},
-        {"date": "2026-09-03", "count": 53},
-        {"date": "2026-09-06", "count": 49},
-        {"date": "2026-09-09", "count": 61},
-        {"date": "2026-09-12", "count": 58},
-        {"date": "2026-09-15", "count": 66},
-    ],
-    "hotspots": [
-        {"location": "Sector 18, Noida", "count": 42},
-        {"location": "MG Road Junction", "count": 37},
-        {"location": "Sector 62 Market", "count": 29},
-        {"location": "Block B, Sector 50", "count": 24},
-    ],
-    "aging": {"0-2 days": 38, "3-7 days": 31, "8-14 days": 21, ">14 days": 10},
-}
-
-
 def _period_start(period: str, now: datetime) -> datetime:
     if period == "daily":
         return now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -68,7 +27,7 @@ def _period_start(period: str, now: datetime) -> datetime:
     return now - timedelta(days=30)
 
 
-def _fallback_report(period: str, now: datetime | None = None) -> Dict[str, Any]:
+def _empty_report(period: str, now: datetime | None = None) -> Dict[str, Any]:
     now = now or datetime.now(timezone.utc)
     start = _period_start(period, now)
     return {
@@ -76,7 +35,24 @@ def _fallback_report(period: str, now: datetime | None = None) -> Dict[str, Any]
         "period_label": PERIOD_LABELS[period],
         "start": start.isoformat(),
         "end": now.isoformat(),
-        **FALLBACK_REPORT,
+        "summary": {
+            "total": 0,
+            "resolved": 0,
+            "pending": 0,
+            "urgent": 0,
+            "resolution_rate": 0.0,
+        },
+        "categories": [],
+        "statuses": [],
+        "priorities": [],
+        "trend": [],
+        "hotspots": [],
+        "aging": {
+            "0-2 days": 0,
+            "3-7 days": 0,
+            "8-14 days": 0,
+            ">14 days": 0,
+        },
     }
 
 
@@ -87,7 +63,7 @@ async def build_analytics_report(period: str = "weekly") -> Dict[str, Any]:
     db = get_database()
     now = datetime.now(timezone.utc)
     if db is None:
-        return _fallback_report(period, now)
+        return _empty_report(period, now)
 
     start = _period_start(period, now)
     collection = db["complaints"]
@@ -141,7 +117,7 @@ async def build_analytics_report(period: str = "weekly") -> Dict[str, Any]:
 
     total = int(summary_raw.get("total", 0))
     if total == 0:
-        return _fallback_report(period, now)
+        return _empty_report(period, now)
 
     resolved = int(summary_raw.get("resolved", 0))
     pending = int(summary_raw.get("pending", 0))
@@ -207,7 +183,7 @@ async def get_stats():
         active=s["pending"],
         resolved=s["resolved"],
         urgent=s["urgent"],
-        response="2h 18m",
+        response="-",
     )
 
 
@@ -219,12 +195,7 @@ async def get_distribution():
 
 @router.get("/sla", response_model=List[SLAItem])
 async def get_sla():
-    return [
-        SLAItem(category="Road Damage", percentage=88.4),
-        SLAItem(category="Garbage", percentage=91.5),
-        SLAItem(category="Pothole", percentage=86.0),
-        SLAItem(category="Other", percentage=80.0),
-    ]
+    return []
 
 
 @router.get("/hotspots", response_model=List[HotspotItem])

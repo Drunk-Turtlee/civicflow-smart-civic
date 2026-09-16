@@ -120,7 +120,7 @@ export default function CitizenDashboard() {
           <StatCard icon={<WarningAmberRounded />} label="High Priority" value={urgentCount} hint={urgentCount > 0 ? "Needs Action" : "All Clear"} tone="amber" />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <StatCard icon={<AccessTimeRounded />} label="Avg Response" value="2.4 hrs" hint="City SLA Target" tone="purple" />
+          <StatCard icon={<AccessTimeRounded />} label="Avg Response" value="-" hint="Not available yet" tone="purple" />
         </Grid>
       </Grid>
 

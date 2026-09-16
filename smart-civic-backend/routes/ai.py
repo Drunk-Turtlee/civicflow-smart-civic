@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from fastapi import APIRouter
-from services.ai_service import analyze_complaint_text
+from services.ai_service import analyze_complaint_text_with_gemini
 
 router = APIRouter(prefix="/ai", tags=["AI Smart Assist"])
 
@@ -17,5 +17,5 @@ async def classify_complaint(body: ClassifyRequest):
     """
     Analyzes complaint description and returns category, urgency and concise summary.
     """
-    res = analyze_complaint_text(body.description)
+    res = await analyze_complaint_text_with_gemini(body.description)
     return ClassifyResponse(**res)

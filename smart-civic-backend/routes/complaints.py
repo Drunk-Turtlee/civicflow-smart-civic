@@ -254,13 +254,24 @@ async def list_complaints(
         else:
             results = sorted(results, key=lambda x: str(x.get("id", "")), reverse=True)
             
+    similar_counts = {}
+    for item in results:
+        if item.get("status") == "Resolved":
+            continue
+        category = item.get("category", "Other")
+        similar_counts[category] = similar_counts.get(category, 0) + 1
+
     out = []
     for item in results:
         doc = dict(item)
         if "created_at" in doc and isinstance(doc["created_at"], datetime):
             delta_days = (datetime.utcnow() - doc["created_at"]).days
             doc["age"] = max(doc.get("age", 0), delta_days)
-            res_scoring = calculate_priority_score(doc["category"], doc["age"], similar_count=2)
+            res_scoring = calculate_priority_score(
+                doc["category"],
+                doc["age"],
+                similar_count=similar_counts.get(doc.get("category"), 0),
+            )
             doc["score"] = res_scoring["score"]
         out.append(ComplaintResponse(**doc))
         

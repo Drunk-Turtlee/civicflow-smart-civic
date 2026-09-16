@@ -13,7 +13,6 @@ import { useNavigate } from "react-router-dom";
 import StatCard from "../components/StatCard";
 import ComplaintTable from "../components/ComplaintTable";
 import { getAllComplaints, getCurrentUser, getTimeGreeting } from "../data/complaintsStore";
-import { distribution } from "../data/mockData";
 import { useTranslation } from "react-i18next";
 
 export default function AdminDashboard() {
@@ -25,7 +24,24 @@ export default function AdminDashboard() {
 
   const urgent = allComplaints.filter((x) => ["Critical", "High"].includes(x.priority));
   const unresolved = allComplaints.filter((x) => x.status !== "Resolved");
-  const hotspots = ["Sector 18, Noida", "MG Road Junction", "Sector 62 Market", "Block B, Sector 50"];
+  const resolved = allComplaints.filter((x) => x.status === "Resolved");
+  const workload = useMemo(() => {
+    const counts = unresolved.reduce((acc, complaint) => {
+      const category = complaint.category || "Other";
+      acc[category] = (acc[category] || 0) + 1;
+      return acc;
+    }, {});
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }, [unresolved]);
+  const hotspots = useMemo(() => {
+    const counts = unresolved.reduce((acc, complaint) => {
+      const location = complaint.location || "Unknown";
+      acc[location] = (acc[location] || 0) + 1;
+      return acc;
+    }, {});
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 4);
+  }, [unresolved]);
+  const resolutionRate = allComplaints.length ? `${Math.round((resolved.length / allComplaints.length) * 100)}%` : "-";
 
   return (
     <Box>
@@ -56,7 +72,7 @@ export default function AdminDashboard() {
           <StatCard icon={<AccessTimeRounded />} label="Unresolved" value={unresolved.length} hint="In progress" tone="purple" />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <StatCard icon={<CheckCircleRounded />} label="SLA met" value="92.4%" hint="+2.1% this week" tone="green" />
+          <StatCard icon={<CheckCircleRounded />} label="Resolved" value={resolutionRate} hint="Current queue" tone="green" />
         </Grid>
       </Grid>
 
@@ -84,15 +100,21 @@ export default function AdminDashboard() {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               Current unresolved complaints by category.
             </Typography>
-            {distribution.map(([name, val]) => (
+            {workload.length > 0 ? workload.map(([name, count]) => (
               <Box key={name} sx={{ mb: 1.8 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
                   <Typography fontWeight={750}>{name}</Typography>
-                  <Typography fontWeight={850}>{Math.round(val * 12.5)}</Typography>
+                  <Typography fontWeight={850}>{count}</Typography>
                 </Box>
-                <LinearProgress variant="determinate" value={val * 2.5} sx={{ height: 7, borderRadius: 2 }} />
+                <LinearProgress
+                  variant="determinate"
+                  value={unresolved.length ? (count / unresolved.length) * 100 : 0}
+                  sx={{ height: 7, borderRadius: 2 }}
+                />
               </Box>
-            ))}
+            )) : (
+              <Typography color="text.secondary">No unresolved complaints.</Typography>
+            )}
           </Box>
         </Grid>
 
@@ -104,20 +126,9 @@ export default function AdminDashboard() {
             <Typography color="text.secondary" variant="body2" sx={{ mb: 2 }}>
               Current month by service.
             </Typography>
-            {[
-              ["Road Damage", 88],
-              ["Garbage", 91],
-              ["Pothole", 86],
-              ["Other", 72],
-            ].map(([name, val]) => (
-              <Box key={name} sx={{ mb: 2 }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
-                  <Typography fontWeight={750}>{name}</Typography>
-                  <Typography fontWeight={850}>{val}%</Typography>
-                </Box>
-                <LinearProgress variant="determinate" value={val} sx={{ height: 7, borderRadius: 2 }} />
-              </Box>
-            ))}
+            <Typography color="text.secondary" sx={{ mb: 2 }}>
+              SLA deadline data is not available yet.
+            </Typography>
             <Button fullWidth variant="outlined" onClick={() => navigate("/admin/analytics")}>
               View full analytics
             </Button>
@@ -130,7 +141,7 @@ export default function AdminDashboard() {
                 Hotspot locations
               </Typography>
             </Box>
-            {hotspots.map((name, i) => (
+            {hotspots.length > 0 ? hotspots.map(([name, count], i) => (
               <Box
                 key={name}
                 sx={{
@@ -145,15 +156,17 @@ export default function AdminDashboard() {
                 <Typography fontWeight={750}>
                   {i + 1}. {name}
                 </Typography>
-                <Chip size="small" label={[42, 37, 29, 24][i]} />
+                <Chip size="small" label={count} />
               </Box>
-            ))}
+            )) : (
+              <Typography color="text.secondary">No hotspot data yet.</Typography>
+            )}
           </Box>
 
           <Box className="neo-soft" sx={{ p: 2, borderRadius: 2 }}>
             <Typography fontWeight={850}>Aging alert</Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.4 }}>
-              {unresolved.filter((x) => x.age > 7).length || 1} sampled complaints are over 7 days old. Escalation is handled by the automated SLA rules.
+              {unresolved.filter((x) => x.age > 7).length} complaints are over 7 days old. Escalation is handled by the automated SLA rules.
             </Typography>
           </Box>
         </Grid>
