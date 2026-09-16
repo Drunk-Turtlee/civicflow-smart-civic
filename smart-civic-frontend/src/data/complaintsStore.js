@@ -3,7 +3,7 @@
 // -----------------------------------------------------------------------------
 
 const STORAGE_KEY = "civicflow_complaints_v1";
-const API_BASE = "http://localhost:8000/api/complaints";
+const API_BASE = `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api"}/complaints`;
 
 function normalizeCategory(category, customCategory) {
   if (category === "Pothole / Road") return { category: "Pothole", custom_category: customCategory || null };

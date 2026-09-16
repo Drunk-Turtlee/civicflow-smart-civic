@@ -31,6 +31,8 @@ import AutoAwesomeRounded from "@mui/icons-material/AutoAwesomeRounded";
 import { useTranslation } from "react-i18next";
 import StatusChip from "./StatusChip";
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
+
 export default function ComplaintDetail({ complaint, admin=false, onBack }) {
   const { t } = useTranslation();
   const [status,setStatus] = useState(complaint.status);
@@ -62,7 +64,7 @@ export default function ComplaintDetail({ complaint, admin=false, onBack }) {
   const saveOperationsChanges = async () => {
     try {
       const token = localStorage.getItem("civic_token");
-      const response = await fetch(`http://localhost:8000/api/complaints/${encodeURIComponent(complaint.id)}`, {
+      const response = await fetch(`${API_BASE}/complaints/${encodeURIComponent(complaint.id)}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
