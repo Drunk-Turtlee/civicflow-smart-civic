@@ -5,12 +5,30 @@
 const STORAGE_KEY = "civicflow_complaints_v1";
 const API_BASE = "http://localhost:8000/api/complaints";
 
+function normalizeCategory(category, customCategory) {
+  if (category === "Pothole / Road") return { category: "Pothole", custom_category: customCategory || null };
+  if (category === "Garbage / Waste") return { category: "Garbage", custom_category: customCategory || null };
+  if (category === "Streetlight" || category === "Water Supply" || category === "Drainage") {
+    return { category: "Other", custom_category: customCategory || category };
+  }
+  if (["Road Damage", "Garbage", "Pothole", "Other"].includes(category)) {
+    return { category, custom_category: customCategory || null };
+  }
+  return { category: "Other", custom_category: customCategory || category || null };
+}
+
+function normalizeComplaint(item) {
+  const normalized = normalizeCategory(item.category, item.custom_category);
+  return { ...item, ...normalized };
+}
+
 // Default initial complaints owned by the demo citizen (Ramesh Gupta)
 const DEFAULT_COMPLAINTS = [
   {
     id: "CIV-2026-1048",
     title: "Streetlight not working near Gate 3",
-    category: "Streetlight",
+    category: "Other",
+    custom_category: "Streetlight",
     location: "Sector 18, Noida",
     priority: "High",
     status: "In Progress",
@@ -25,7 +43,7 @@ const DEFAULT_COMPLAINTS = [
   {
     id: "CIV-2026-1047",
     title: "Large pothole causing traffic slowdown",
-    category: "Pothole / Road",
+    category: "Pothole",
     location: "MG Road Junction",
     priority: "High",
     status: "Assigned",
@@ -40,7 +58,7 @@ const DEFAULT_COMPLAINTS = [
   {
     id: "CIV-2026-1046",
     title: "Garbage not collected for 3 days",
-    category: "Garbage / Waste",
+    category: "Garbage",
     location: "Sector 62 Market",
     priority: "Medium",
     status: "New",
@@ -55,7 +73,8 @@ const DEFAULT_COMPLAINTS = [
   {
     id: "CIV-2026-1045",
     title: "Low water pressure in Block B",
-    category: "Water Supply",
+    category: "Other",
+    custom_category: "Water Supply",
     location: "Block B, Sector 50",
     priority: "Medium",
     status: "In Progress",
@@ -70,7 +89,8 @@ const DEFAULT_COMPLAINTS = [
   {
     id: "CIV-2026-1044",
     title: "Drainage overflow beside school",
-    category: "Drainage",
+    category: "Other",
+    custom_category: "Drainage",
     location: "Saraswati School Road",
     priority: "High",
     status: "Resolved",
@@ -116,7 +136,8 @@ export function getAllComplaints() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_COMPLAINTS));
       return DEFAULT_COMPLAINTS;
     }
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.map(normalizeComplaint) : DEFAULT_COMPLAINTS;
   } catch {
     return DEFAULT_COMPLAINTS;
   }
@@ -154,14 +175,14 @@ export async function syncComplaintsFromDB(user = getCurrentUser()) {
     const res = await fetch(url);
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
+      if (Array.isArray(data)) {
         // Merge with local storage
         const currentLocal = getAllComplaints();
         const mergedMap = new Map();
-        [...currentLocal, ...data].forEach(item => mergedMap.set(item.id, item));
+        [...currentLocal, ...data.map(normalizeComplaint)].forEach(item => mergedMap.set(item.id, item));
         const merged = Array.from(mergedMap.values());
         localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-        return user?.role === "admin" ? merged : merged.filter(c => c.created_by_email?.toLowerCase() === user?.email?.toLowerCase());
+        return user?.role === "admin" ? merged : data.map(normalizeComplaint);
       }
     }
   } catch (err) {
@@ -177,6 +198,7 @@ export async function addComplaint(formData, user = getCurrentUser()) {
 
   const payload = {
     category: formData.category || "General",
+    custom_category: formData.customCategory || null,
     description: formData.description,
     location: formData.location || "City Center",
     priority: formData.priority || "Medium",
@@ -216,6 +238,7 @@ export async function addComplaint(formData, user = getCurrentUser()) {
       id: `CIV-2026-${newSeq}`,
       title: formData.description.slice(0, 48) + (formData.description.length > 48 ? "..." : ""),
       category: formData.category || "General",
+      custom_category: formData.customCategory || null,
       location: formData.location || "City Center",
       priority: formData.priority || "Medium",
       status: "New",

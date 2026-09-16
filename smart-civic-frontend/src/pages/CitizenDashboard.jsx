@@ -6,8 +6,6 @@ import CheckCircleRounded from "@mui/icons-material/CheckCircleRounded";
 import WarningAmberRounded from "@mui/icons-material/WarningAmberRounded";
 import AccessTimeRounded from "@mui/icons-material/AccessTimeRounded";
 import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
-import LightbulbOutlined from "@mui/icons-material/LightbulbOutlined";
-import WaterDropOutlined from "@mui/icons-material/WaterDropOutlined";
 import DeleteOutlineRounded from "@mui/icons-material/DeleteOutlineRounded";
 import ConstructionRounded from "@mui/icons-material/ConstructionRounded";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
@@ -41,10 +39,10 @@ export default function CitizenDashboard() {
   if (selected) return <ComplaintDetail complaint={selected} onBack={() => setSelected(null)} />;
 
   const services = [
-    ["Streetlight", <LightbulbOutlined />],
-    ["Pothole / Road", <ConstructionRounded />],
-    ["Garbage / Waste", <DeleteOutlineRounded />],
-    ["Water Supply", <WaterDropOutlined />],
+    ["Road Damage", <ConstructionRounded />],
+    ["Garbage", <DeleteOutlineRounded />],
+    ["Pothole", <ConstructionRounded />],
+    ["Other", <InfoOutlined />],
   ];
 
   const tracked = myComplaints.length > 0 ? myComplaints[0] : null;
@@ -54,7 +52,7 @@ export default function CitizenDashboard() {
   // Calculate dynamic stats for this user
   const activeCount = myComplaints.filter((x) => x.status !== "Resolved").length;
   const resolvedCount = myComplaints.filter((x) => x.status === "Resolved").length;
-  const urgentCount = myComplaints.filter((x) => x.priority === "High" && x.status !== "Resolved").length;
+  const urgentCount = myComplaints.filter((x) => ["Critical", "High"].includes(x.priority) && x.status !== "Resolved").length;
 
   return (
     <Box>
@@ -194,7 +192,7 @@ export default function CitizenDashboard() {
                 </Typography>
                 <Typography color="text.secondary">{tracked ? tracked.id : "Live Tracker"}</Typography>
               </Box>
-              {tracked && <Chip label={tracked.priority} size="small" color={tracked.priority === "High" ? "error" : "primary"} />}
+              {tracked && <Chip label={tracked.priority} size="small" color={["Critical", "High"].includes(tracked.priority) ? "error" : "primary"} />}
             </Box>
 
             {tracked ? (

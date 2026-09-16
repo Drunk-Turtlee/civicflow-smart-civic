@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from config import settings
 from database import connect_to_mongo, close_mongo_connection
-from routes import auth, complaints, analytics, ai
+from routes import auth, complaints, analytics, ai, reports
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("smart_civic_backend")
@@ -40,6 +40,7 @@ app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(complaints.router, prefix=settings.API_V1_STR)
 app.include_router(analytics.router, prefix=settings.API_V1_STR)
 app.include_router(ai.router, prefix=settings.API_V1_STR)
+app.include_router(reports.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 async def root():

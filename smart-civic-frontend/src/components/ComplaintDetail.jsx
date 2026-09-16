@@ -73,6 +73,13 @@ export default function ComplaintDetail({ complaint, admin=false, onBack }) {
           {[[<LocationOnRounded/> ,"Location",complaint.location],[<AccessTimeRounded/> ,"Age",`${complaint.age} days`],[<PersonRounded/> ,"Assigned to",assigned],[<AutoAwesomeRounded/> ,"Priority score",`${complaint.score}/100`]].map(([icon,label,value])=><Box key={label} className="neo-soft" sx={{p:1.7,borderRadius:1.7}}><Box sx={{display:"flex",gap:1,alignItems:"center",color:"primary.main"}}>{icon}<Typography variant="caption" fontWeight={800}>{label}</Typography></Box><Typography fontWeight={800} sx={{mt:.7}}>{value}</Typography></Box>)}
         </Box>
 
+        {complaint.category === "Other" && complaint.custom_category && (
+          <Box className="neo-soft" sx={{ p:1.7, borderRadius:1.7, mb:2 }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={800}>Specified category</Typography>
+            <Typography fontWeight={800} sx={{ mt:.5 }}>{complaint.custom_category}</Typography>
+          </Box>
+        )}
+
         <Box sx={{px:{xs:0,md:2},py:2}}><Typography fontWeight={850} sx={{mb:2}}>Status timeline</Typography><Box sx={{display:"flex",alignItems:"flex-start",overflowX:"auto",pb:1}}>{steps.map((step,i)=><Box key={step} sx={{minWidth:150,flex:1,textAlign:"center",position:"relative"}}>{i<steps.length-1&&<Box sx={{position:"absolute",top:14,left:"50%",right:"-50%",height:3,bgcolor:i<active?"primary.main":"divider",zIndex:0}}/>}<Box sx={{position:"relative",zIndex:1,mx:"auto",width:30,height:30,borderRadius:"50%",display:"grid",placeItems:"center",bgcolor:i<=active?"primary.main":"action.disabledBackground",color:i<=active?"#fff":"text.secondary"}}>{i<active?<CheckCircleRounded fontSize="small"/>:i+1}</Box><Typography variant="caption" fontWeight={800} sx={{display:"block",mt:1}}>{step}</Typography><Typography variant="caption" color="text.secondary">{i<active?"Completed":i===active?"Current status":"Pending"}</Typography></Box>)}</Box></Box>
 
         <Divider sx={{my:2}} />

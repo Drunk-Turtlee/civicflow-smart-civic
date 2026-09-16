@@ -34,7 +34,7 @@ export default function ComplaintsPage({ admin = false }) {
 
   const categories = ["All", ...new Set(complaintSource.map((x) => x.category))];
   const statuses = ["All", "New", "Assigned", "In Progress", "Resolved"];
-  const priorities = ["All", "High", "Medium", "Low"];
+  const priorities = ["All", "Critical", "High", "Medium", "Low"];
 
   const rows = useMemo(() => {
     const filtered = complaintSource.filter((x) => {

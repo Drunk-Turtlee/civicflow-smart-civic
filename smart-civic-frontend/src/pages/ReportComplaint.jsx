@@ -30,12 +30,21 @@ import { addComplaint, getCurrentUser } from "../data/complaintsStore";
 const DRAFT_KEY = "civicflow-complaint-draft";
 const MAX_DESCRIPTION = 1000;
 const COMPLAINTS_API = "http://localhost:8000/api/complaints";
+const CATEGORIES = ["Road Damage", "Garbage", "Pothole", "Other"];
+
+const mapDetectionToCategory = (detectionClass = "") => {
+  const normalized = detectionClass.toLowerCase();
+  if (normalized.includes("pothole")) return "Pothole";
+  if (normalized.includes("garbage") || normalized.includes("waste")) return "Garbage";
+  if (normalized.includes("road") || normalized.includes("damage")) return "Road Damage";
+  return "Other";
+};
 
 export default function ReportComplaint() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const fileInput = useRef(null);
-  const [form, setForm] = useState({ category:"Streetlight", description:"", location:"", priority:"Medium", anonymous:false });
+  const [form, setForm] = useState({ category:"Other", customCategory:"", description:"", location:"", priority:"Medium", anonymous:false });
   const [photo, setPhoto] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [createdId, setCreatedId] = useState("");
@@ -61,6 +70,32 @@ export default function ReportComplaint() {
     setDraftSaved(true);
     setTimeout(() => setDraftSaved(false), 1800);
   };
+
+  useEffect(() => {
+    if (!form.category) return;
+
+    const controller = new AbortController();
+
+    const updatePriority = async () => {
+      try {
+        const response = await fetch(
+          `${COMPLAINTS_API}/priority-preview?category=${encodeURIComponent(form.category)}&age_days=0`,
+          { signal: controller.signal }
+        );
+        const result = await response.json();
+        if (response.ok && result.priority) {
+          set("priority", result.priority);
+        }
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.warn("Priority preview unavailable:", err.message);
+        }
+      }
+    };
+
+    updatePriority();
+    return () => controller.abort();
+  }, [form.category]);
 
   const useLocation = () => {
     if (!navigator.geolocation) {
@@ -105,8 +140,14 @@ export default function ReportComplaint() {
         throw new Error(result.detail || "Image verification failed.");
       }
 
+      const detectedCategory = result.verified
+        ? mapDetectionToCategory(result.detections?.[0]?.class)
+        : "Other";
+
+      set("category", detectedCategory);
       setPhotoVerification(result);
     } catch (err) {
+      set("category", "Other");
       setPhotoError(err.message || "Image verification failed.");
     } finally {
       setPhotoVerifying(false);
@@ -131,7 +172,7 @@ export default function ReportComplaint() {
   };
 
   const applyAssist = (result) => {
-    setForm((current) => ({ ...current, category: result.category, priority: result.urgency, description: result.summary }));
+    setForm((current) => ({ ...current, category: CATEGORIES.includes(result.category) ? result.category : "Other", description: result.summary }));
   };
 
   const submit = async (event) => {
@@ -167,15 +208,27 @@ export default function ReportComplaint() {
           <Grid size={{xs:12,md:6}}>
             <Typography fontWeight={800} sx={{ mb:.8 }}>{t("category")}</Typography>
             <Select fullWidth value={form.category} onChange={e=>set("category",e.target.value)}>
-              {["Streetlight","Pothole / Road","Garbage / Waste","Water Supply","Drainage","Other"].map(x=><MenuItem key={x} value={x}>{x}</MenuItem>)}
+              {CATEGORIES.map(x=><MenuItem key={x} value={x}>{x}</MenuItem>)}
             </Select>
           </Grid>
           <Grid size={{xs:12,md:6}}>
             <Typography fontWeight={800} sx={{ mb:.8 }}>{t("priority")}</Typography>
-            <Select fullWidth value={form.priority} onChange={e=>set("priority",e.target.value)}>
-              {["Low","Medium","High"].map(x=><MenuItem key={x} value={x}>{x}</MenuItem>)}
+            <Select fullWidth value={form.priority} disabled>
+              {["Low","Medium","High","Critical"].map(x=><MenuItem key={x} value={x}>{x}</MenuItem>)}
             </Select>
           </Grid>
+
+          {form.category === "Other" && (
+            <Grid size={12}>
+              <Typography fontWeight={800} sx={{ mb:.8 }}>Specify category</Typography>
+              <TextField
+                fullWidth
+                value={form.customCategory}
+                onChange={e=>set("customCategory", e.target.value)}
+                placeholder="Example: water leakage, streetlight, drainage, sanitation..."
+              />
+            </Grid>
+          )}
 
           <Grid size={12}>
             <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"end", mb:.8 }}>

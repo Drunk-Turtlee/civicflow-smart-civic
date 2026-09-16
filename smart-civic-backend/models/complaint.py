@@ -74,3 +74,16 @@ class HotspotItem(BaseModel):
 class DistributionItem(BaseModel):
     category: str
     count: int
+
+class AnalyticsReport(BaseModel):
+    period: str
+    period_label: str
+    start: str
+    end: str
+    summary: Dict[str, Any]
+    categories: List[Dict[str, Any]]
+    statuses: List[Dict[str, Any]]
+    priorities: List[Dict[str, Any]]
+    trend: List[Dict[str, Any]]
+    hotspots: List[Dict[str, Any]]
+    aging: Dict[str, int]

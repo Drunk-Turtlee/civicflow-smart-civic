@@ -23,7 +23,7 @@ export default function AdminDashboard() {
   const currentUser = useMemo(() => getCurrentUser(), []);
   const allComplaints = useMemo(() => getAllComplaints(), []);
 
-  const urgent = allComplaints.filter((x) => x.priority === "High");
+  const urgent = allComplaints.filter((x) => ["Critical", "High"].includes(x.priority));
   const unresolved = allComplaints.filter((x) => x.status !== "Resolved");
   const hotspots = ["Sector 18, Noida", "MG Road Junction", "Sector 62 Market", "Block B, Sector 50"];
 
@@ -105,10 +105,10 @@ export default function AdminDashboard() {
               Current month by service.
             </Typography>
             {[
-              ["Streetlight", 96],
-              ["Garbage / Waste", 91],
-              ["Pothole / Road", 88],
-              ["Water Supply", 94],
+              ["Road Damage", 88],
+              ["Garbage", 91],
+              ["Pothole", 86],
+              ["Other", 72],
             ].map(([name, val]) => (
               <Box key={name} sx={{ mb: 2 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>

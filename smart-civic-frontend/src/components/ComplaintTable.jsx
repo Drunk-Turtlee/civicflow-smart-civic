@@ -18,7 +18,7 @@ export default function ComplaintTable({ rows, onSelect }) {
         <TableBody>
           {rows.map(row => <TableRow key={row.id} hover onClick={()=>onSelect?.(row)} sx={{cursor:onSelect?"pointer":"default"}}>
             <TableCell><Typography fontWeight={850}>{row.id}</Typography><Typography variant="caption" color="text.secondary">{row.title}</Typography></TableCell>
-            <TableCell>{row.category}</TableCell><TableCell>{row.location}</TableCell>
+            <TableCell>{row.category === "Other" && row.custom_category ? `Other: ${row.custom_category}` : row.category}</TableCell><TableCell>{row.location}</TableCell>
             <TableCell><Chip size="small" label={`${row.priority} · ${row.score}`} sx={{fontWeight:800,borderRadius:1.5}} /></TableCell>
             <TableCell><StatusChip status={row.status} /></TableCell><TableCell sx={{whiteSpace:"nowrap"}}>{row.time}</TableCell>
             <TableCell><ArrowForwardRounded fontSize="small" /></TableCell>

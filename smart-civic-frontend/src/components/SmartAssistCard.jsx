@@ -25,7 +25,7 @@ export default function SmartAssistCard({ description, onApply }) {
     // Simulates network latency so the prototype demonstrates a proper loading state.
     setTimeout(() => {
       const text = description.toLowerCase();
-      const category = text.includes("light") ? "Streetlight" : text.includes("pothole") || text.includes("road") ? "Pothole / Road" : text.includes("garbage") || text.includes("waste") ? "Garbage / Waste" : text.includes("water") ? "Water Supply" : text.includes("drain") ? "Drainage" : "Other";
+      const category = text.includes("pothole") ? "Pothole" : text.includes("road") ? "Road Damage" : text.includes("garbage") || text.includes("waste") ? "Garbage" : "Other";
       const urgency = text.includes("danger") || text.includes("accident") || text.includes("school") ? "High" : text.includes("week") || text.includes("days") ? "Medium" : "Low";
       const summary = description.trim().length > 110 ? `${description.trim().slice(0, 107)}...` : description.trim();
       setResult({ category, urgency, summary });
