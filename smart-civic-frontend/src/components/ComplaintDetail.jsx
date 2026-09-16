@@ -59,6 +59,29 @@ export default function ComplaintDetail({ complaint, admin=false, onBack }) {
     setTimeout(()=>setNotice(""),1800);
   };
 
+  const saveOperationsChanges = async () => {
+    try {
+      const token = localStorage.getItem("civic_token");
+      const response = await fetch(`http://localhost:8000/api/complaints/${encodeURIComponent(complaint.id)}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ status, assigned }),
+      });
+
+      if (!response.ok) throw new Error("Could not save complaint changes.");
+
+      const updatedComplaint = await response.json();
+      setStatus(updatedComplaint.status);
+      setAssigned(updatedComplaint.assigned);
+      setNotice("Operations changes saved.");
+    } catch (error) {
+      setNotice(error.message || "Could not save complaint changes.");
+    }
+  };
+
   return (
     <Box>
       <Button startIcon={<ArrowBackRounded />} onClick={onBack} sx={{mb:2}}>Back</Button>
@@ -113,7 +136,7 @@ export default function ComplaintDetail({ complaint, admin=false, onBack }) {
             <Select fullWidth size="small" value={status} onChange={e=>setStatus(e.target.value)} sx={{mt:.5,mb:1.5}}>{steps.map(s=><MenuItem key={s} value={s}>{s}</MenuItem>)}</Select>
             <Typography variant="caption" color="text.secondary">Assign team member</Typography>
             <Select fullWidth size="small" value={assigned} onChange={e=>setAssigned(e.target.value)} sx={{mt:.5}}>{officers.map(s=><MenuItem key={s} value={s}>{s}</MenuItem>)}</Select>
-            <Button variant="contained" sx={{mt:1.5}} onClick={()=>setNotice("Operations changes saved (demo).")}>Save changes</Button>
+            <Button variant="contained" sx={{mt:1.5}} onClick={saveOperationsChanges}>Save changes</Button>
           </Box>
           <Box className="neo-inset" sx={{p:2,borderRadius:1.7}}>
             <Typography fontWeight={800}>Internal update</Typography>
