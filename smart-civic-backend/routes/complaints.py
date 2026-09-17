@@ -14,6 +14,7 @@ from config import settings
 router = APIRouter(prefix="/complaints", tags=["Complaints Queue"])
 
 VISION_SERVICE_PATH = Path(__file__).resolve().parents[1] / "Image-Verification" / "vision_service.py"
+MAX_FILE_SIZE = 5 * 1024 * 1024
 _vision_service = None
 
 
@@ -148,11 +149,18 @@ async def verify_complaint_image(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Please upload a valid image file.")
 
     suffix = Path(file.filename or "upload.jpg").suffix or ".jpg"
+    file_data = await file.read()
+
+    if len(file_data) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail="Image must be smaller than 5 MB",
+        )
 
     try:
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             temp_path = Path(tmp.name)
-            tmp.write(await file.read())
+            tmp.write(file_data)
 
         vision_service = _load_vision_service()
         result = await asyncio.to_thread(vision_service.verify_image, temp_path)
