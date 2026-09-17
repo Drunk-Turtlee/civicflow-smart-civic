@@ -1,101 +1,29 @@
 """
-CivicFlow Vision Verification Service
+Compatibility wrapper for the backend-local vision service.
 
-The YOLO model is downloaded automatically from Hugging Face on first use.
-The model is not stored in the GitHub repository.
-
-Supported classes:
-- Pothole
-- Road Damage
-- Garbage
+The authoritative image verification implementation lives at:
+smart-civic-backend/Image-Verification/vision_service.py
 """
 
+import importlib.util
 from pathlib import Path
-from typing import Any
-
-from huggingface_hub import hf_hub_download
-from ultralytics import YOLO
 
 
-MODEL_REPO = "Vansh180/PotholeNet-V1"
-MODEL_FILENAME = "Vision%20Classification.pt"
-MODEL_DIR = Path(__file__).parent / "model"
+BACKEND_VISION_SERVICE = (
+    Path(__file__).resolve().parents[1]
+    / "smart-civic-backend"
+    / "Image-Verification"
+    / "vision_service.py"
+)
 
+spec = importlib.util.spec_from_file_location(
+    "civicflow_backend_vision_service",
+    BACKEND_VISION_SERVICE,
+)
+if spec is None or spec.loader is None:
+    raise RuntimeError(f"Could not load backend vision service from {BACKEND_VISION_SERVICE}")
 
-def _load_model() -> YOLO:
-    """Download the model if needed, then load it once."""
-    MODEL_DIR.mkdir(parents=True, exist_ok=True)
+_backend_service = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(_backend_service)
 
-    model_path = hf_hub_download(
-        repo_id=MODEL_REPO,
-        filename=MODEL_FILENAME,
-        local_dir=str(MODEL_DIR),
-    )
-
-    return YOLO(model_path)
-
-
-model = _load_model()
-
-
-def verify_image(
-    image_path: str | Path,
-    confidence: float = 0.25,
-    image_size: int = 768,
-) -> dict[str, Any]:
-    """
-    Verify a civic-issue image.
-
-    Returns:
-        {
-            "verified": bool,
-            "detections": [
-                {
-                    "class": "Pothole",
-                    "confidence": 0.91,
-                    "bbox": [x1, y1, x2, y2]
-                }
-            ]
-        }
-    """
-    if not 0.0 <= confidence <= 1.0:
-        raise ValueError("confidence must be between 0.0 and 1.0")
-
-    image_path = Path(image_path)
-
-    if not image_path.exists():
-        raise FileNotFoundError(f"Image not found: {image_path}")
-
-    results = model(
-        str(image_path),
-        imgsz=image_size,
-        conf=confidence,
-        verbose=False,
-    )
-
-    result = results[0]
-    detections = []
-
-    if result.boxes is not None:
-        for box in result.boxes:
-            class_id = int(box.cls[0])
-            score = float(box.conf[0])
-            x1, y1, x2, y2 = box.xyxy[0].tolist()
-
-            detections.append(
-                {
-                    "class": result.names[class_id],
-                    "confidence": round(score, 4),
-                    "bbox": [
-                        round(x1, 2),
-                        round(y1, 2),
-                        round(x2, 2),
-                        round(y2, 2),
-                    ],
-                }
-            )
-
-    return {
-        "verified": len(detections) > 0,
-        "detections": detections,
-    }
+verify_image = _backend_service.verify_image

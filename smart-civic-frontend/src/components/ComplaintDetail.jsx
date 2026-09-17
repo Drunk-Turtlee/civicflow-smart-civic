@@ -31,7 +31,8 @@ import AutoAwesomeRounded from "@mui/icons-material/AutoAwesomeRounded";
 import { useTranslation } from "react-i18next";
 import StatusChip from "./StatusChip";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
+const API_ROOT = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "");
+const API_BASE = `${API_ROOT}/api`;
 
 export default function ComplaintDetail({ complaint, admin=false, onBack }) {
   const { t } = useTranslation();

@@ -35,7 +35,8 @@ import { useTranslation } from "react-i18next";
 import { useThemeMode } from "../theme/ThemeModeContext";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 
-const BACKEND_API = `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api"}/auth`;
+const API_ROOT = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "");
+const BACKEND_API = `${API_ROOT}/api/auth`;
 const GOOGLE_CLIENT_ID =
   import.meta.env.VITE_GOOGLE_CLIENT_ID ||
   import.meta.env.GOOGLE_CLIENT_ID ||

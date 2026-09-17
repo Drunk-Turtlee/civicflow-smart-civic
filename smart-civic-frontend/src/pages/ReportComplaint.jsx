@@ -29,7 +29,8 @@ import { addComplaint, getCurrentUser } from "../data/complaintsStore";
 
 const DRAFT_KEY = "civicflow-complaint-draft";
 const MAX_DESCRIPTION = 1000;
-const COMPLAINTS_API = `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api"}/complaints`;
+const API_ROOT = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "");
+const COMPLAINTS_API = `${API_ROOT}/api/complaints`;
 const CATEGORIES = ["Road Damage", "Garbage", "Pothole", "Other"];
 
 const mapDetectionToCategory = (detectionClass = "") => {

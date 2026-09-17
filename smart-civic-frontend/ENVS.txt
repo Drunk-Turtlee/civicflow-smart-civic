@@ -8,3 +8,7 @@ GOOGLE_CLIENT_ID=<google_oauth_client_id>
 CLOUDINARY_CLOUD_NAME=<cloudinary_cloud_name>
 CLOUDINARY_API_KEY=<cloudinary_api_key>
 CLOUDINARY_API_SECRET=<cloudinary_api_secret>
+
+# Frontend .env
+VITE_API_URL=https://civicflow-smart-civic-backend.onrender.com
+VITE_GOOGLE_CLIENT_ID=<google_oauth_client_id>

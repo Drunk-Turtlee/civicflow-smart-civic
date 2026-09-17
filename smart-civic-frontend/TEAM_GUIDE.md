@@ -61,7 +61,7 @@ Example:
 ```js
 // complaintService.js
 export async function getComplaints() {
-  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/complaints`);
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/complaints`);
   if (!response.ok) throw new Error("Failed to load complaints");
   return response.json();
 }
@@ -264,7 +264,7 @@ npm run build
 `.env.example` contains:
 
 ```text
-VITE_API_BASE_URL=http://localhost:8000
+VITE_API_URL=http://localhost:8000
 ```
 
 After the backend is available, copy it to `.env` and change the URL if required.

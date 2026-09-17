@@ -1,4 +1,4 @@
-from ai.vision.vision_service import verify_image
+from vision_service import verify_image
 
 IMAGE_PATH = "test.jpg"
 

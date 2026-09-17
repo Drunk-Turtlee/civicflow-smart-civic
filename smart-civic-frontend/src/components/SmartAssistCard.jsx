@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Alert, Box, Button, Chip, CircularProgress, Typography } from "@mui/material";
 import AutoAwesomeRounded from "@mui/icons-material/AutoAwesomeRounded";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
+const API_ROOT = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "");
+const API_BASE = `${API_ROOT}/api`;
 
 export default function SmartAssistCard({ description, onApply }) {
   const [loading, setLoading] = useState(false);
