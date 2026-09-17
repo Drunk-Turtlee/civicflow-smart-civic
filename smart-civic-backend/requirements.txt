@@ -10,9 +10,7 @@ requests>=2.31.0
 python-multipart>=0.0.9
 argon2-cffi>=23.1.0
 ultralytics
-torch
-torchvision
-opencv-python
+opencv-python-headless
 Pillow
 huggingface_hub
 cloudinary
