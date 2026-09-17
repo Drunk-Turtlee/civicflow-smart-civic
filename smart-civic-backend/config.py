@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -26,14 +27,22 @@ class Settings(BaseSettings):
     CLOUDINARY_API_KEY: str = os.getenv("CLOUDINARY_API_KEY", "")
     CLOUDINARY_API_SECRET: str = os.getenv("CLOUDINARY_API_SECRET", "")
     
-    # CORS
-    BACKEND_CORS_ORIGINS: list[str] = [
-        origin.strip()
-        for origin in (os.getenv("BACKEND_CORS_ORIGINS") or os.getenv("CORS_ORIGINS") or "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:3000,*").split(",")
-        if origin.strip()
-    ]
+    # CORS Property: Parses strings or JSON without Pydantic EnvSettingsSource decoding errors
+    @property
+    def BACKEND_CORS_ORIGINS(self) -> list[str]:
+        raw = os.getenv("BACKEND_CORS_ORIGINS") or os.getenv("CORS_ORIGINS") or "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:3000,*"
+        raw = raw.strip()
+        if raw.startswith("[") and raw.endswith("]"):
+            try:
+                parsed = json.loads(raw)
+                if isinstance(parsed, list):
+                    return [str(x).strip() for x in parsed if str(x).strip()]
+            except Exception:
+                pass
+        return [origin.strip() for origin in raw.split(",") if origin.strip()]
 
     class Config:
         case_sensitive = True
+        extra = "ignore"
 
 settings = Settings()
